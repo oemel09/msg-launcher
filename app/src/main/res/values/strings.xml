@@ -1,0 +1,19 @@
+<resources>
+    <string name="app_name">msg launcher</string>
+    <string name="title_home">Home</string>
+    <string name="title_settings">Settings</string>
+
+    <string name="read_contacts_access_required">Reading contacts is required for this app to show your contacts.</string>
+    <string name="ok">OK</string>
+    <string name="read_contacts_permission_granted">Reading contacts permission was granted.</string>
+    <string name="read_contacts_permission_denied">Reading contacts permission request was denied.</string>
+
+    <string name="contacts_explanation">Tap a contact to start chatting</string>
+    <string name="contacts_loading">Loading contacts…</string>
+    <string name="no_messenger_found">No messenger found for this contact.</string>
+    <string name="search_hint">Search for any contact</string>
+
+    <string name="sort_messengers">Trying to open messengers in the following order</string>
+    <string name="add_contact">Add contact</string>
+    <string name="messenger_icon">Messengers Icon</string>
+</resources>
