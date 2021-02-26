@@ -18,11 +18,11 @@ class SettingsViewModel(application: Application) : AndroidViewModel(application
 
     fun changePosition(fromPosition: Int, toPosition: Int) {
         if (fromPosition < toPosition) {
-            for (i in fromPosition..toPosition) {
+            for (i in fromPosition until toPosition) {
                 Collections.swap(messengers, i, i + 1)
             }
         } else {
-            for (i in fromPosition downTo toPosition step -1) {
+            for (i in fromPosition downTo toPosition + 1) {
                 Collections.swap(messengers, i, i - 1)
             }
         }
