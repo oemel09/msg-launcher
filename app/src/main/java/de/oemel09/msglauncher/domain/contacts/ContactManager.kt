@@ -2,9 +2,11 @@ package de.oemel09.msglauncher.domain.contacts
 
 import android.content.Context
 import android.util.Log
+import de.oemel09.msglauncher.domain.messengers.MESSENGER_ID_AUTO
+import de.oemel09.msglauncher.domain.messengers.Messenger
 
-private const val CONTACTS = "CONTACTS"
-private const val ADDRESS_BOOK_ALREADY_QUERIED = "address_book_already_queried"
+internal const val CONTACTS = "CONTACTS"
+internal const val ADDRESS_BOOK_ALREADY_QUERIED = "address_book_already_queried"
 private val TAG = ContactManager::class.simpleName
 
 class ContactManager(context: Context) {
@@ -33,8 +35,19 @@ class ContactManager(context: Context) {
         return contacts
     }
 
+    internal fun changeCustomMessenger(contact: Contact, customMessenger: Messenger) {
+        val messengerId = customMessenger.id
+        contact.customMessenger = if (messengerId == MESSENGER_ID_AUTO) null else messengerId
+        contactDB.updateCustomMessenger(contact)
+    }
+
     internal fun hideContact(contact: Contact) {
         contact.isListed = false
+        contactDB.updateContactIsListed(contact)
+    }
+
+    internal fun showContact(contact: Contact) {
+        contact.isListed = true
         contactDB.updateContactIsListed(contact)
     }
 

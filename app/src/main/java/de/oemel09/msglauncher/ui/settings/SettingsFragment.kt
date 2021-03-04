@@ -25,7 +25,7 @@ class SettingsFragment : Fragment(), OnItemDragListener {
     ): View? {
         settingsViewModel = ViewModelProvider(this).get(SettingsViewModel::class.java)
         val root = inflater.inflate(R.layout.fragment_settings, container, false)
-        messengerAdapter = MessengerAdapter(requireContext())
+        messengerAdapter = MessengerAdapter(requireContext(), null)
         val rvMessengers = root.findViewById<RecyclerView>(R.id.rv_messengers)
         rvMessengers.layoutManager = LinearLayoutManager(context)
         rvMessengers.adapter = messengerAdapter

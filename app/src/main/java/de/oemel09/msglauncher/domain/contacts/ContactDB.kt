@@ -7,7 +7,7 @@ import android.database.SQLException
 import android.database.sqlite.SQLiteDatabase
 import android.database.sqlite.SQLiteOpenHelper
 
-private const val DATABASE_VERSION = 1
+private const val DATABASE_VERSION = 3
 private const val DATABASE_NAME = "contacts_db"
 
 private const val TABLE_NAME = "contacts"
@@ -24,7 +24,7 @@ const val CREATE_TABLE = ("CREATE TABLE " + TABLE_NAME + "("
         + COLUMN_PRIORITY + " INTEGER"
         + ")")
 
-class ContactDB(context: Context) :
+class ContactDB(private val context: Context) :
     SQLiteOpenHelper(context, DATABASE_NAME, null, DATABASE_VERSION) {
 
     override fun onCreate(db: SQLiteDatabase?) {
@@ -33,6 +33,10 @@ class ContactDB(context: Context) :
 
     override fun onUpgrade(db: SQLiteDatabase?, oldVersion: Int, newVersion: Int) {
         db?.execSQL("DROP TABLE IF EXISTS $TABLE_NAME")
+        context.getSharedPreferences(CONTACTS, Context.MODE_PRIVATE).edit().putBoolean(
+            ADDRESS_BOOK_ALREADY_QUERIED, false
+        ).apply()
+
         onCreate(db)
     }
 
@@ -71,7 +75,7 @@ class ContactDB(context: Context) :
         var selectionArgs = emptyArray<String>()
         if (filter != null && filter.isNotEmpty()) {
             selection = "$COLUMN_NAME LIKE ?"
-            selectionArgs = arrayOf("% $filter %")
+            selectionArgs = arrayOf("%$filter%")
         }
         val cursor = db.query(TABLE_NAME, null, selection, selectionArgs, null, null, null, null)
         val contacts = extractContacts(cursor)
@@ -99,6 +103,12 @@ class ContactDB(context: Context) :
         return contacts
     }
 
+    internal fun updateCustomMessenger(contact: Contact) {
+        val values = ContentValues()
+        values.put(COLUMN_CUSTOM_MESSENGER, contact.customMessenger)
+        update(values, contact.lookup)
+    }
+
     internal fun updateContactIsListed(contact: Contact) {
         val values = ContentValues()
         values.put(COLUMN_IS_LISTED, contact.isListed)
@@ -116,3 +126,5 @@ class ContactDB(context: Context) :
         db.update(TABLE_NAME, values, "$COLUMN_LOOKUP = ?", arrayOf(lookup))
     }
 }
+
+// TODO find a way to update db and get rid of invalid contacts

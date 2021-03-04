@@ -2,6 +2,7 @@ package de.oemel09.msglauncher.ui.home
 
 import android.Manifest
 import android.app.Activity
+import android.app.Dialog
 import android.content.Intent
 import android.content.pm.PackageManager
 import android.os.Bundle
@@ -15,6 +16,7 @@ import android.view.ViewGroup
 import android.view.inputmethod.EditorInfo
 import android.view.inputmethod.InputMethodManager
 import android.widget.TextView
+import androidx.appcompat.app.AlertDialog
 import androidx.core.app.ActivityCompat
 import androidx.fragment.app.Fragment
 import androidx.lifecycle.ViewModelProvider
@@ -25,12 +27,15 @@ import com.google.android.material.snackbar.Snackbar
 import com.google.android.material.textfield.TextInputEditText
 import de.oemel09.msglauncher.R
 import de.oemel09.msglauncher.domain.Opener
+import de.oemel09.msglauncher.domain.messengers.MESSENGER_ID_AUTO
+import de.oemel09.msglauncher.domain.messengers.Messenger
 import de.oemel09.msglauncher.domain.messengers.MessengerManager
 import de.oemel09.msglauncher.ui.ItemTouchHelperCallback
 import de.oemel09.msglauncher.ui.OnItemDragListener
+import de.oemel09.msglauncher.ui.settings.MessengerAdapter
 
 private const val PERMISSION_REQUEST_READ_CONTACTS = 1305
-private const val START_SEARCH_DELAY = 100
+private const val START_SEARCH_DELAY = 250
 
 class HomeFragment : Fragment(), OnItemDragListener, ContactAdapter.OnContactClickListener {
 
@@ -39,6 +44,7 @@ class HomeFragment : Fragment(), OnItemDragListener, ContactAdapter.OnContactCli
     private lateinit var rootLayout: View
     private lateinit var contactAdapter: ContactAdapter
     private lateinit var messengerManager: MessengerManager
+    private lateinit var customMessengerDialog: Dialog
     private val searchStartHandler = Handler()
 
     override fun onCreateView(
@@ -63,9 +69,6 @@ class HomeFragment : Fragment(), OnItemDragListener, ContactAdapter.OnContactCli
 
         val etSearch = root.findViewById<TextInputEditText>(R.id.et_search)
         etSearch.addTextChangedListener(searchWatcher)
-        etSearch.setOnClickListener {
-            etSearch.setText("")
-        }
         etSearch.setOnEditorActionListener { _: TextView, actionId: Int, _: KeyEvent ->
             if (actionId == EditorInfo.IME_ACTION_SEARCH) {
                 val imm =
@@ -83,27 +86,29 @@ class HomeFragment : Fragment(), OnItemDragListener, ContactAdapter.OnContactCli
     }
 
     private val searchWatcher = object : TextWatcher {
-        override fun beforeTextChanged(p0: CharSequence?, p1: Int, p2: Int, p3: Int) {}
+        override fun beforeTextChanged(text: CharSequence?, start: Int, count: Int, after: Int) {}
 
-        override fun onTextChanged(charSequence: CharSequence?, p1: Int, p2: Int, p3: Int) {
-            if (charSequence!!.length >= 2) {
+        override fun onTextChanged(text: CharSequence?, start: Int, before: Int, count: Int) {
+            if (text!!.length >= 2) {
                 searchStartHandler.removeCallbacksAndMessages(null)
                 searchStartHandler.postDelayed({
                     homeViewModel.loadContacts(
-                        charSequence.toString(),
+                        text.toString().trim(),
                         object : HomeViewModel.LoadContactListener {
                             override fun onContactsLoaded(oldSize: Int, newSize: Int) {
+                                contactAdapter.isSearchResult = true
                                 contactAdapter.notifyItemRangeRemoved(0, oldSize)
-                                contactAdapter.notifyItemRangeRemoved(0, oldSize)
+                                contactAdapter.notifyItemRangeInserted(0, newSize)
                             }
                         })
                 }, START_SEARCH_DELAY.toLong())
-            } else {
+            } else if (text.isEmpty()) {
+                contactAdapter.isSearchResult = false
                 readContacts()
             }
         }
 
-        override fun afterTextChanged(p0: Editable?) {}
+        override fun afterTextChanged(s: Editable?) {}
     }
 
     override fun onRequestPermissionsResult(
@@ -173,7 +178,7 @@ class HomeFragment : Fragment(), OnItemDragListener, ContactAdapter.OnContactCli
         )
     }
 
-    override fun onClick(position: Int) {
+    override fun onContactClick(position: Int) {
         val contact = homeViewModel.getContact(position)
         val opener = messengerManager.getOpener(contact)
         if (opener == null) {
@@ -182,6 +187,51 @@ class HomeFragment : Fragment(), OnItemDragListener, ContactAdapter.OnContactCli
         } else {
             openMessenger(opener)
         }
+    }
+
+    override fun onAddContactClick(position: Int) {
+        homeViewModel.addItem(position)
+        contactAdapter.notifyItemChanged(position)
+        Snackbar.make(
+            rootLayout,
+            R.string.contact_added_to_list,
+            Snackbar.LENGTH_SHORT
+        ).show()
+    }
+
+    override fun onMessengerIconClick(position: Int) {
+        val builder = AlertDialog.Builder(requireContext())
+        val contactPosition = position
+        val selectedContact = homeViewModel.getContact(position)
+        builder.setTitle(
+            getString(
+                R.string.select_custom_messenger,
+                selectedContact.name
+            )
+        )
+        val contentView = layoutInflater.inflate(R.layout.dialog_messenger_list, null)
+        val recyclerView = contentView.findViewById<RecyclerView>(R.id.rv_messengers)
+        recyclerView.layoutManager = LinearLayoutManager(requireContext())
+
+        val messengers = messengerManager.getAllApplicableMessengers(selectedContact) as MutableList
+        val autoSelectMessenger =
+            Messenger(MESSENGER_ID_AUTO, getString(R.string.select_messenger_automatically), 0)
+        messengers.add(0, autoSelectMessenger)
+
+        val messengerAdapter =
+            MessengerAdapter(requireContext(), object : MessengerAdapter.OnMessengerClickListener {
+                override fun onMessengerClick(position: Int) {
+                    customMessengerDialog.dismiss()
+                    homeViewModel.updateCustomMessenger(contactPosition, messengers[position])
+                    contactAdapter.notifyItemChanged(contactPosition)
+                }
+            })
+        messengerAdapter.updateMessengers(messengers)
+        recyclerView.adapter = messengerAdapter
+        builder.setView(contentView)
+
+        customMessengerDialog = builder.create()
+        customMessengerDialog.show()
     }
 
     override fun onItemDismiss(position: Int) {

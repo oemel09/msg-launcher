@@ -9,6 +9,7 @@ import de.oemel09.msglauncher.domain.Opener
 import de.oemel09.msglauncher.domain.contacts.Contact
 import java.util.*
 
+const val MESSENGER_ID_AUTO = "AUTOMATICALLY_CHOOSE_BEST"
 const val MESSENGER_NAME_THREEMA = "Threema"
 const val MESSENGER_ID_THREEMA = "ch.threema.app"
 const val MESSENGER_ID_WHATSAPP = "com.whatsapp"
@@ -29,9 +30,9 @@ private const val MESSENGERS = "MESSENGERS"
 
 class MessengerManager(private val context: Context) {
 
-    private var messengers: MutableList<Messenger> = loadMessengers()
+    private var messengers: List<Messenger> = loadMessengers()
 
-    private fun loadMessengers(): MutableList<Messenger> {
+    private fun loadMessengers(): List<Messenger> {
         var messengers: MutableList<Messenger>?
         val sharedPreferences = context.getSharedPreferences(MESSENGERS, Context.MODE_PRIVATE)
         val gson = Gson()
@@ -48,6 +49,7 @@ class MessengerManager(private val context: Context) {
                 }
             }
         }
+        messengers.sort()
         return messengers
     }
 
@@ -60,14 +62,9 @@ class MessengerManager(private val context: Context) {
         }
     }
 
-    fun saveMessengers(messengers: MutableList<Messenger>) {
-        this.messengers = messengers
+    fun saveMessengers() {
         val sharedPreferences = context.getSharedPreferences(MESSENGERS, Context.MODE_PRIVATE)
-        val gson = Gson()
-        val json = gson.toJson(messengers)
-        val editor = sharedPreferences.edit()
-        editor.putString(MESSENGERS, json)
-        editor.apply()
+        sharedPreferences.edit().putString(MESSENGERS, Gson().toJson(messengers)).apply()
     }
 
     private val supportedMessengers: Array<Messenger>
@@ -78,22 +75,31 @@ class MessengerManager(private val context: Context) {
             Messenger(MESSENGER_ID_WHATSAPP, MESSENGER_NAME_WHATSAPP, 10)
         )
 
-    fun getMessengers(): MutableList<Messenger> {
-        messengers.sort()
+    internal fun getAllMessengers(): List<Messenger> {
         return messengers
     }
 
-    fun getOpener(contact: Contact): Opener? {
-        for (m in messengers) {
-            val opener = hasMessenger(contact.lookup, m.id)
-            if (opener != null) {
-                return opener
-            }
+    internal fun getAllApplicableMessengers(contact: Contact): List<Messenger> {
+        return messengers.filter {
+            createOpener(contact.lookup, it.id) != null
         }
-        return null
     }
 
-    private fun hasMessenger(lookup: String, messengerId: String): Opener? {
+    internal fun getOpener(contact: Contact): Opener? {
+        if (contact.customMessenger == null) {
+            for (m in messengers) {
+                val opener = createOpener(contact.lookup, m.id)
+                if (opener != null) {
+                    return opener
+                }
+            }
+            return null
+        } else {
+            return createOpener(contact.lookup, contact.customMessenger!!)
+        }
+    }
+
+    private fun createOpener(lookup: String, messengerId: String): Opener? {
         var opener: Opener? = null
         val projection = arrayOf(ContactsContract.RawContacts._ID, ContactsContract.Data.MIMETYPE)
         val selection = (ContactsContract.Data.LOOKUP_KEY + " = ? AND "

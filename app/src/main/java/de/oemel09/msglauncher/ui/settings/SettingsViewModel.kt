@@ -10,7 +10,7 @@ import java.util.*
 class SettingsViewModel(application: Application) : AndroidViewModel(application) {
 
     private val messengerManager: MessengerManager = MessengerManager(application)
-    private val messengers = messengerManager.getMessengers()
+    private val messengers = messengerManager.getAllMessengers()
 
     val messengerLiveData = MutableLiveData<List<Messenger>>().apply {
         value = messengers
@@ -35,6 +35,6 @@ class SettingsViewModel(application: Application) : AndroidViewModel(application
     }
 
     fun saveMessengers() {
-        messengerManager.saveMessengers(messengers)
+        messengerManager.saveMessengers()
     }
 }

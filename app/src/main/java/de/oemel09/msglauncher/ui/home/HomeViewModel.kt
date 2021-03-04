@@ -7,6 +7,7 @@ import androidx.lifecycle.AndroidViewModel
 import androidx.lifecycle.MutableLiveData
 import de.oemel09.msglauncher.domain.contacts.Contact
 import de.oemel09.msglauncher.domain.contacts.ContactManager
+import de.oemel09.msglauncher.domain.messengers.Messenger
 import java.util.*
 
 class HomeViewModel(application: Application) : AndroidViewModel(application) {
@@ -44,9 +45,17 @@ class HomeViewModel(application: Application) : AndroidViewModel(application) {
         }.execute()
     }
 
+    internal fun updateCustomMessenger(position: Int, customMessenger: Messenger) {
+        contactManager.changeCustomMessenger(contacts[position], customMessenger)
+    }
+
     internal fun removeItem(position: Int) {
         val contact = contacts.removeAt(position)
         contactManager.hideContact(contact)
+    }
+
+    internal fun addItem(position: Int) {
+        contactManager.showContact(contacts[position])
     }
 
     internal fun moveItem(fromPosition: Int, toPosition: Int) {
@@ -81,7 +90,7 @@ class HomeViewModel(application: Application) : AndroidViewModel(application) {
         contactManager.updateDb()
     }
 
-    public interface LoadContactListener {
+    interface LoadContactListener {
         fun onContactsLoaded(oldSize: Int, newSize: Int)
     }
 }

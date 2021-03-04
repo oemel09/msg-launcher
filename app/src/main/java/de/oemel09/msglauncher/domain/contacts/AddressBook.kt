@@ -6,7 +6,7 @@ import android.content.pm.PackageManager
 import android.provider.ContactsContract
 import androidx.core.app.ActivityCompat
 
-private const val MAX_FAVORITE_CONTACTS = 7
+private const val MAX_FAVORITE_CONTACTS = 5
 
 class AddressBook(private val context: Context) {
 
