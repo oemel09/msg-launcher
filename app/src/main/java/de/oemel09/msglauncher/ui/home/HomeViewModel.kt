@@ -86,10 +86,6 @@ class HomeViewModel(application: Application) : AndroidViewModel(application) {
         return contacts[position]
     }
 
-    internal fun saveContacts() {
-        contactManager.updateDb()
-    }
-
     interface LoadContactListener {
         fun onContactsLoaded(oldSize: Int, newSize: Int)
     }

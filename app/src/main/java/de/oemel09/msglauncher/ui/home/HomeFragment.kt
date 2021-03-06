@@ -250,9 +250,4 @@ class HomeFragment : Fragment(), OnItemDragListener, ContactAdapter.OnContactCli
         messengerIntent.flags = Intent.FLAG_ACTIVITY_SINGLE_TOP or Intent.FLAG_ACTIVITY_CLEAR_TOP
         startActivity(messengerIntent)
     }
-
-    override fun onDetach() {
-        super.onDetach()
-        homeViewModel.saveContacts()
-    }
 }

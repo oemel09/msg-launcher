@@ -24,7 +24,7 @@ const val CREATE_TABLE = ("CREATE TABLE " + TABLE_NAME + "("
         + COLUMN_PRIORITY + " INTEGER"
         + ")")
 
-class ContactDB(private val context: Context) :
+class ContactDb(private val context: Context) :
     SQLiteOpenHelper(context, DATABASE_NAME, null, DATABASE_VERSION) {
 
     override fun onCreate(db: SQLiteDatabase?) {
@@ -51,7 +51,8 @@ class ContactDB(private val context: Context) :
 
         try {
             db.insertOrThrow(TABLE_NAME, null, values)
-        } catch (ignore: SQLException) {
+        } catch (e: SQLException) {
+            updateName(contact)
         }
         db.close()
     }
@@ -83,6 +84,22 @@ class ContactDB(private val context: Context) :
         return contacts
     }
 
+    internal fun loadAllContactLookups(): MutableSet<String> {
+        val db = readableDatabase
+
+        val cursor = db.query(TABLE_NAME, null, null, null, null, null, null, null)
+        val contactLookups = mutableSetOf<String>()
+        if (cursor != null) {
+            if (cursor.moveToFirst()) {
+                do {
+                    contactLookups.add(cursor.getString(cursor.getColumnIndex(COLUMN_LOOKUP)))
+                } while (cursor.moveToNext())
+            }
+            cursor.close()
+        }
+        return contactLookups
+    }
+
     private fun extractContacts(cursor: Cursor?): List<Contact> {
         val contacts = mutableListOf<Contact>()
         if (cursor != null) {
@@ -101,6 +118,12 @@ class ContactDB(private val context: Context) :
             cursor.close()
         }
         return contacts
+    }
+
+    private fun updateName(contact: Contact) {
+        val values = ContentValues()
+        values.put(COLUMN_NAME, contact.name)
+        update(values, contact.lookup)
     }
 
     internal fun updateCustomMessenger(contact: Contact) {
@@ -125,6 +148,9 @@ class ContactDB(private val context: Context) :
         val db = writableDatabase
         db.update(TABLE_NAME, values, "$COLUMN_LOOKUP = ?", arrayOf(lookup))
     }
-}
 
-// TODO find a way to update db and get rid of invalid contacts
+    internal fun deleteContact(lookup: String) {
+        val db = writableDatabase
+        db.delete(TABLE_NAME, "$COLUMN_LOOKUP = ?", arrayOf(lookup))
+    }
+}
