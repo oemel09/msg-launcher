@@ -8,15 +8,21 @@
     <string name="read_contacts_permission_granted">Reading contacts permission was granted.</string>
     <string name="read_contacts_permission_denied">Reading contacts permission request was denied.</string>
 
-    <string name="contacts_explanation">Tap a contact to start chatting</string>
-    <string name="contacts_loading">Loading contacts…</string>
-    <string name="no_messenger_found">No messenger found for this contact.</string>
-    <string name="search_hint">Search for any contact</string>
+    <string name="home_contacts_explanation">Tap a contact to start chatting</string>
+    <string name="home_no_messenger_found">No messenger found for this contact.</string>
+    <string name="home_search_hint">Search for any contact</string>
+    <string name="home_contact_added_to_list">%1$s permanently added to list</string>
+    <string name="home_select_custom_messenger_for_user">Select a specific messenger for %1$s</string>
+    <string name="home_select_messenger_automatically">Automatically choose best</string>
+    <string name="home_contact_not_found">Error: The selected contact could not be found.</string>
 
-    <string name="sort_messengers">Trying to open messengers in the following order</string>
-    <string name="add_contact_to_list">Add contact to list</string>
-    <string name="messenger_icon">Messengers Icon</string>
-    <string name="contact_added_to_list">Contact permanently added to list</string>
-    <string name="select_custom_messenger">Select a specific messenger for %1$s</string>
-    <string name="select_messenger_automatically">Automatically choose best</string>
+    <string name="settings_sort_messengers">Trying to open messengers in the following order</string>
+
+    <string name="messenger_item_messenger_icon">Messengers Icon</string>
+
+    <string name="contact_item_add_contact_to_list">Add contact to list</string>
+    <string name="contact_item_select_custom_messenger">Select a specific messenger</string>
+    <string name="contact_item_open_contact_page">Open contact page</string>
+    <string name="settings_show_open_contacts_page">Show button to open contacts page</string>
+    <string name="settings_general">General</string>
 </resources>

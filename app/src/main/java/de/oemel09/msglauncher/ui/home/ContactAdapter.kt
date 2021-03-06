@@ -12,12 +12,18 @@ import androidx.core.view.setPadding
 import androidx.recyclerview.widget.RecyclerView
 import de.oemel09.msglauncher.R
 import de.oemel09.msglauncher.domain.contacts.Contact
+import de.oemel09.msglauncher.ui.settings.PREFS_APPEARANCE
+import de.oemel09.msglauncher.ui.settings.PREFS_SHOW_OPEN_CONTACT_PAGE
 
 class ContactAdapter(
     private val context: Context,
     private val onContactClickListener: OnContactClickListener
 ) : RecyclerView.Adapter<RecyclerView.ViewHolder>() {
 
+    private val showOpenContactPage =
+        context.getSharedPreferences(PREFS_APPEARANCE, Context.MODE_PRIVATE).getBoolean(
+            PREFS_SHOW_OPEN_CONTACT_PAGE, false
+        )
     private lateinit var contacts: List<Contact>
     var isSearchResult: Boolean = false
 
@@ -32,7 +38,9 @@ class ContactAdapter(
         val contactViewHolder = holder as ContactViewHolder
         contactViewHolder.tvName.text = contact.name
         contactViewHolder.ibAddContact.visibility =
-            if (contact.isListed) View.INVISIBLE else View.VISIBLE
+            if (contact.isListed) View.GONE else View.VISIBLE
+        contactViewHolder.ibOpenContactPage.visibility =
+            if (showOpenContactPage) View.VISIBLE else View.GONE
         if (contact.customMessenger == null) {
             contactViewHolder.ivMessengerIcon.setImageResource(R.drawable.ic_automatic)
             contactViewHolder.ivMessengerIcon.setBackgroundResource(R.drawable.round_button)
@@ -66,9 +74,11 @@ class ContactAdapter(
             itemView
         ) {
 
-        internal val tvName = itemView.findViewById<TextView>(R.id.tv_contact_name)
-        internal val ibAddContact = itemView.findViewById<ImageButton>(R.id.ib_add_contact_to_list)
-        internal val ivMessengerIcon = itemView.findViewById<ImageView>(R.id.iv_messenger_icon)
+        internal val tvName = itemView.findViewById<TextView>(R.id.contact_item_tv_contact_name)
+        internal val ibAddContact = itemView.findViewById<ImageButton>(R.id.contact_item_ib_add_contact_to_list)
+        internal val ibOpenContactPage =
+            itemView.findViewById<ImageButton>(R.id.contact_item_ib_open_contact_page)
+        internal val ivMessengerIcon = itemView.findViewById<ImageView>(R.id.contact_item_iv_messenger_icon)
 
         init {
             itemView.findViewById<View>(R.id.contact_item_root).setOnClickListener {
@@ -76,6 +86,9 @@ class ContactAdapter(
             }
             ibAddContact.setOnClickListener {
                 onContactClickListener.onAddContactClick(adapterPosition)
+            }
+            ibOpenContactPage.setOnClickListener {
+                onContactClickListener.onOpenContactPageClick(adapterPosition)
             }
             ivMessengerIcon.setOnClickListener {
                 onContactClickListener.onMessengerIconClick(adapterPosition)
@@ -86,6 +99,7 @@ class ContactAdapter(
     interface OnContactClickListener {
         fun onContactClick(position: Int)
         fun onAddContactClick(position: Int)
+        fun onOpenContactPageClick(position: Int)
         fun onMessengerIconClick(position: Int)
     }
 }

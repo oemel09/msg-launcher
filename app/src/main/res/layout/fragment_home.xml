@@ -8,12 +8,12 @@
     tools:context=".ui.home.HomeFragment">
 
     <TextView
-        android:id="@+id/text_home"
+        android:id="@+id/home_tv_explanation"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:layout_marginHorizontal="@dimen/default_margin"
         android:layout_marginTop="@dimen/default_margin"
-        android:text="@string/contacts_explanation"
+        android:text="@string/home_contacts_explanation"
         android:textAlignment="center"
         android:textSize="24sp"
         app:layout_constraintEnd_toEndOf="parent"
@@ -21,32 +21,32 @@
         app:layout_constraintTop_toTopOf="parent" />
 
     <com.google.android.material.textfield.TextInputLayout
-        android:id="@+id/search_layout"
+        android:id="@+id/home_til_search_contacts"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:layout_marginHorizontal="@dimen/default_margin"
         android:layout_marginTop="@dimen/default_margin"
-        android:hint="@string/search_hint"
+        android:hint="@string/home_search_hint"
         android:imeOptions="actionSearch"
         android:inputType="text"
         app:endIconMode="clear_text"
-        app:layout_constraintTop_toBottomOf="@+id/text_home">
+        app:layout_constraintTop_toBottomOf="@+id/home_tv_explanation">
 
         <com.google.android.material.textfield.TextInputEditText
-            android:id="@+id/et_search"
+            android:id="@+id/home_tiet_search_contacts"
             android:layout_width="match_parent"
             android:layout_height="wrap_content" />
 
     </com.google.android.material.textfield.TextInputLayout>
 
     <androidx.recyclerview.widget.RecyclerView
-        android:id="@+id/rv_contacts"
+        android:id="@+id/home_rv_contacts"
         android:layout_width="match_parent"
         android:layout_height="0dp"
         android:layout_marginTop="@dimen/default_margin"
         app:layout_constraintBottom_toBottomOf="parent"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toBottomOf="@+id/search_layout" />
+        app:layout_constraintTop_toBottomOf="@+id/home_til_search_contacts" />
 
 </androidx.constraintlayout.widget.ConstraintLayout>

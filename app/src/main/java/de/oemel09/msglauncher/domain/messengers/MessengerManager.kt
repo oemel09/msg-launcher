@@ -2,6 +2,7 @@ package de.oemel09.msglauncher.domain.messengers
 
 import android.content.Context
 import android.content.pm.PackageManager
+import android.net.Uri
 import android.provider.ContactsContract
 import com.google.gson.Gson
 import com.google.gson.reflect.TypeToken
@@ -26,7 +27,7 @@ const val MIME_TYPE_PROFILE = "%.profile"
 const val MIME_TYPE_CONTACT = "%.contact"
 
 // for shared prefs
-private const val MESSENGERS = "MESSENGERS"
+private const val PREFS_MESSENGERS = "MESSENGERS"
 
 class MessengerManager(private val context: Context) {
 
@@ -34,9 +35,9 @@ class MessengerManager(private val context: Context) {
 
     private fun loadMessengers(): List<Messenger> {
         var messengers: MutableList<Messenger>?
-        val sharedPreferences = context.getSharedPreferences(MESSENGERS, Context.MODE_PRIVATE)
+        val sharedPreferences = context.getSharedPreferences(PREFS_MESSENGERS, Context.MODE_PRIVATE)
         val gson = Gson()
-        val json = sharedPreferences.getString(MESSENGERS, null)
+        val json = sharedPreferences.getString(PREFS_MESSENGERS, null)
         val type = object : TypeToken<List<Messenger?>?>() {}.type
         messengers = gson.fromJson(json, type)
         if (messengers == null) {
@@ -63,8 +64,8 @@ class MessengerManager(private val context: Context) {
     }
 
     fun saveMessengers() {
-        val sharedPreferences = context.getSharedPreferences(MESSENGERS, Context.MODE_PRIVATE)
-        sharedPreferences.edit().putString(MESSENGERS, Gson().toJson(messengers)).apply()
+        val sharedPreferences = context.getSharedPreferences(PREFS_MESSENGERS, Context.MODE_PRIVATE)
+        sharedPreferences.edit().putString(PREFS_MESSENGERS, Gson().toJson(messengers)).apply()
     }
 
     private val supportedMessengers: Array<Messenger>
@@ -83,6 +84,28 @@ class MessengerManager(private val context: Context) {
         return messengers.filter {
             createOpener(contact.lookup, it.id) != null
         }
+    }
+
+    internal fun getContactUri(contact: Contact): Uri? {
+        var contactUri: Uri? = null
+        val projection = arrayOf(ContactsContract.RawContacts._ID)
+        val selection = ContactsContract.Data.LOOKUP_KEY + " = ?"
+        val selectionArgs = arrayOf(contact.lookup)
+        val cursor = context.contentResolver.query(
+            ContactsContract.Data.CONTENT_URI,
+            projection,
+            selection,
+            selectionArgs,
+            null
+        )
+        if (cursor != null && cursor.count > 0) {
+            if (cursor.moveToNext()) {
+                contactUri =
+                    ContactsContract.Contacts.getLookupUri(cursor.getLong(0), contact.lookup)
+            }
+            cursor.close()
+        }
+        return contactUri
     }
 
     internal fun getOpener(contact: Contact): Opener? {

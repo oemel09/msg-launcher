@@ -6,7 +6,7 @@
     android:layout_height="wrap_content">
 
     <TextView
-        android:id="@+id/tv_contact_name"
+        android:id="@+id/contact_item_tv_contact_name"
         android:layout_width="0dp"
         android:layout_height="0dp"
         android:ellipsize="end"
@@ -16,33 +16,48 @@
         android:singleLine="true"
         android:textSize="20sp"
         app:layout_constraintBottom_toBottomOf="parent"
-        app:layout_constraintEnd_toStartOf="@+id/ib_add_contact_to_list"
+        app:layout_constraintEnd_toStartOf="@+id/contact_item_ib_add_contact_to_list"
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintTop_toTopOf="parent" />
 
     <ImageButton
-        android:id="@+id/ib_add_contact_to_list"
+        android:id="@+id/contact_item_ib_add_contact_to_list"
         android:layout_width="48dp"
         android:layout_height="48dp"
         android:layout_marginHorizontal="@dimen/default_margin"
         android:layout_marginVertical="@dimen/round_button_margin"
         android:background="@drawable/round_button"
-        android:contentDescription="@string/add_contact_to_list"
+        android:contentDescription="@string/contact_item_add_contact_to_list"
         android:padding="@dimen/round_button_padding"
         android:src="@drawable/ic_add_contact"
         android:tint="@color/primaryTextColor"
         app:layout_constraintBottom_toBottomOf="parent"
-        app:layout_constraintEnd_toStartOf="@+id/iv_messenger_icon"
+        app:layout_constraintEnd_toStartOf="@+id/contact_item_ib_open_contact_page"
         app:layout_constraintTop_toTopOf="parent" />
 
-    <ImageView
-        android:id="@+id/iv_messenger_icon"
+    <ImageButton
+        android:id="@+id/contact_item_ib_open_contact_page"
         android:layout_width="48dp"
         android:layout_height="48dp"
         android:layout_marginHorizontal="@dimen/default_margin"
         android:layout_marginVertical="@dimen/round_button_margin"
         android:background="@drawable/round_button"
-        android:contentDescription="@string/add_contact_to_list"
+        android:contentDescription="@string/contact_item_open_contact_page"
+        android:padding="@dimen/round_button_padding"
+        android:src="@drawable/ic_contact_page"
+        android:tint="@color/primaryTextColor"
+        app:layout_constraintBottom_toBottomOf="parent"
+        app:layout_constraintEnd_toStartOf="@+id/contact_item_iv_messenger_icon"
+        app:layout_constraintTop_toTopOf="parent" />
+
+    <ImageView
+        android:id="@+id/contact_item_iv_messenger_icon"
+        android:layout_width="48dp"
+        android:layout_height="48dp"
+        android:layout_marginHorizontal="@dimen/default_margin"
+        android:layout_marginVertical="@dimen/round_button_margin"
+        android:background="@drawable/round_button"
+        android:contentDescription="@string/contact_item_select_custom_messenger"
         android:padding="@dimen/round_button_padding"
         android:src="@drawable/ic_automatic"
         app:layout_constraintBottom_toBottomOf="parent"

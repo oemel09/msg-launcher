@@ -6,8 +6,6 @@ import android.content.pm.PackageManager
 import android.provider.ContactsContract
 import androidx.core.app.ActivityCompat
 
-private const val MAX_FAVORITE_CONTACTS = 5
-
 class AddressBook(private val context: Context) {
 
     internal fun loadListedContacts(): MutableList<Contact> {
@@ -27,17 +25,13 @@ class AddressBook(private val context: Context) {
                         cursor.getString(cursor.getColumnIndex(ContactsContract.Contacts.LOOKUP_KEY))
                     val name =
                         cursor.getString(cursor.getColumnIndex(ContactsContract.Contacts.DISPLAY_NAME))
-                    contacts.add(Contact(lookupKey, name, null, true, priority))
+                    contacts.add(Contact(lookupKey, name, null, false, priority))
                     priority++
                 }
                 cursor.close()
             }
         }
-        return if (contacts.size < MAX_FAVORITE_CONTACTS) {
-            contacts
-        } else {
-            contacts.subList(0, MAX_FAVORITE_CONTACTS)
-        }
+        return contacts
     }
 
     internal fun loadContacts(filter: String?): MutableList<Contact> {

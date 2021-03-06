@@ -1,7 +1,6 @@
 package de.oemel09.msglauncher.ui.settings
 
 import android.content.Context
-import android.content.res.ColorStateList
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
@@ -49,8 +48,9 @@ class MessengerAdapter(
         itemView: View,
         private val onMessengerClickListener: OnMessengerClickListener?
     ) : RecyclerView.ViewHolder(itemView) {
-        internal val ivIcon = itemView.findViewById<ImageView>(R.id.iv_messenger_icon)
-        internal val tvName = itemView.findViewById<TextView>(R.id.tv_messenger_name)
+        internal val ivIcon =
+            itemView.findViewById<ImageView>(R.id.messenger_item_iv_messenger_icon)
+        internal val tvName = itemView.findViewById<TextView>(R.id.messenger_tv_messenger_name)
 
         init {
             itemView.setOnClickListener {

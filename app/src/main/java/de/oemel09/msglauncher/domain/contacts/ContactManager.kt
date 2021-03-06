@@ -4,10 +4,13 @@ import android.content.Context
 import android.util.Log
 import de.oemel09.msglauncher.domain.messengers.MESSENGER_ID_AUTO
 import de.oemel09.msglauncher.domain.messengers.Messenger
+import kotlin.math.min
+
+private val TAG = ContactManager::class.simpleName
+private const val MAX_FAVORITE_CONTACTS = 5
 
 internal const val CONTACTS = "CONTACTS"
 internal const val ADDRESS_BOOK_ALREADY_QUERIED = "address_book_already_queried"
-private val TAG = ContactManager::class.simpleName
 
 class ContactManager(context: Context) {
 
@@ -19,10 +22,15 @@ class ContactManager(context: Context) {
         var contacts = contactDb.loadListedContacts()
         if (!prefs.getBoolean(ADDRESS_BOOK_ALREADY_QUERIED, false) && contacts.isEmpty()) {
             contacts = addressBook.loadListedContacts()
-            contacts.forEach { c ->
-                contactDb.insertContact(c)
+            if (contacts.isNotEmpty()) {
+                contacts.forEach { contactDb.insertContact(it) }
+                prefs.edit().putBoolean(ADDRESS_BOOK_ALREADY_QUERIED, true).apply()
+                contacts = contacts.subList(0, min(contacts.size, MAX_FAVORITE_CONTACTS))
+                contacts.forEach {
+                    it.isListed = true
+                    contactDb.updateContactIsListed(it)
+                }
             }
-            prefs.edit().putBoolean(ADDRESS_BOOK_ALREADY_QUERIED, true).apply()
         }
         return contacts
     }

@@ -5,6 +5,7 @@ import android.app.Activity
 import android.app.Dialog
 import android.content.Intent
 import android.content.pm.PackageManager
+import android.net.Uri
 import android.os.Bundle
 import android.os.Handler
 import android.text.Editable
@@ -53,10 +54,10 @@ class HomeFragment : Fragment(), OnItemDragListener, ContactAdapter.OnContactCli
         savedInstanceState: Bundle?
     ): View? {
         homeViewModel = ViewModelProvider(this).get(HomeViewModel::class.java)
-        rootLayout = requireActivity().findViewById(R.id.container)
+        rootLayout = requireActivity().findViewById(R.id.main_container)
         contactAdapter = ContactAdapter(requireContext(), this)
         val root = inflater.inflate(R.layout.fragment_home, container, false)
-        val rvContacts = root.findViewById<RecyclerView>(R.id.rv_contacts)
+        val rvContacts = root.findViewById<RecyclerView>(R.id.home_rv_contacts)
         rvContacts.layoutManager = LinearLayoutManager(context)
         rvContacts.adapter = contactAdapter
         val dragDirs = ItemTouchHelper.UP or ItemTouchHelper.DOWN
@@ -67,7 +68,7 @@ class HomeFragment : Fragment(), OnItemDragListener, ContactAdapter.OnContactCli
             contactAdapter.updateContacts(it)
         })
 
-        val etSearch = root.findViewById<TextInputEditText>(R.id.et_search)
+        val etSearch = root.findViewById<TextInputEditText>(R.id.home_tiet_search_contacts)
         etSearch.addTextChangedListener(searchWatcher)
         etSearch.setOnEditorActionListener { _: TextView, actionId: Int, _: KeyEvent ->
             if (actionId == EditorInfo.IME_ACTION_SEARCH) {
@@ -165,7 +166,7 @@ class HomeFragment : Fragment(), OnItemDragListener, ContactAdapter.OnContactCli
                 Snackbar.LENGTH_INDEFINITE
             ).setAction(R.string.ok) {
                 showReadContactsPermissionRequest()
-            }
+            }.show()
         } else {
             showReadContactsPermissionRequest()
         }
@@ -182,7 +183,11 @@ class HomeFragment : Fragment(), OnItemDragListener, ContactAdapter.OnContactCli
         val contact = homeViewModel.getContact(position)
         val opener = messengerManager.getOpener(contact)
         if (opener == null) {
-            Snackbar.make(rootLayout, getString(R.string.no_messenger_found), Snackbar.LENGTH_SHORT)
+            Snackbar.make(
+                rootLayout,
+                getString(R.string.home_no_messenger_found),
+                Snackbar.LENGTH_SHORT
+            )
                 .show()
         } else {
             openMessenger(opener)
@@ -194,9 +199,24 @@ class HomeFragment : Fragment(), OnItemDragListener, ContactAdapter.OnContactCli
         contactAdapter.notifyItemChanged(position)
         Snackbar.make(
             rootLayout,
-            R.string.contact_added_to_list,
+            getString(R.string.home_contact_added_to_list, homeViewModel.getContact(position).name),
             Snackbar.LENGTH_SHORT
         ).show()
+    }
+
+    override fun onOpenContactPageClick(position: Int) {
+        val contact = homeViewModel.getContact(position)
+        val contactUri = messengerManager.getContactUri(contact)
+        if (contactUri == null) {
+            Snackbar.make(
+                rootLayout,
+                getString(R.string.home_contact_not_found),
+                Snackbar.LENGTH_SHORT
+            )
+                .show()
+        } else {
+            openContactPage(contactUri)
+        }
     }
 
     override fun onMessengerIconClick(position: Int) {
@@ -205,17 +225,18 @@ class HomeFragment : Fragment(), OnItemDragListener, ContactAdapter.OnContactCli
         val selectedContact = homeViewModel.getContact(position)
         builder.setTitle(
             getString(
-                R.string.select_custom_messenger,
+                R.string.home_select_custom_messenger_for_user,
                 selectedContact.name
             )
         )
-        val contentView = layoutInflater.inflate(R.layout.dialog_messenger_list, null)
-        val recyclerView = contentView.findViewById<RecyclerView>(R.id.rv_messengers)
+        val contentView = layoutInflater.inflate(R.layout.messenger_list_dialog, null)
+        val recyclerView =
+            contentView.findViewById<RecyclerView>(R.id.messenger_list_dialog_rv_messengers)
         recyclerView.layoutManager = LinearLayoutManager(requireContext())
 
         val messengers = messengerManager.getAllApplicableMessengers(selectedContact) as MutableList
         val autoSelectMessenger =
-            Messenger(MESSENGER_ID_AUTO, getString(R.string.select_messenger_automatically), 0)
+            Messenger(MESSENGER_ID_AUTO, getString(R.string.home_select_messenger_automatically), 0)
         messengers.add(0, autoSelectMessenger)
 
         val messengerAdapter =
@@ -248,6 +269,11 @@ class HomeFragment : Fragment(), OnItemDragListener, ContactAdapter.OnContactCli
         val messengerIntent = Intent(Intent.ACTION_VIEW)
         messengerIntent.setDataAndType(opener.contactUri, opener.mimeType)
         messengerIntent.flags = Intent.FLAG_ACTIVITY_SINGLE_TOP or Intent.FLAG_ACTIVITY_CLEAR_TOP
+        startActivity(messengerIntent)
+    }
+
+    private fun openContactPage(contactUri: Uri) {
+        val messengerIntent = Intent(Intent.ACTION_VIEW, contactUri)
         startActivity(messengerIntent)
     }
 }
