@@ -90,8 +90,8 @@ class HomeFragment : Fragment(), OnItemDragListener, ContactAdapter.OnContactCli
         override fun beforeTextChanged(text: CharSequence?, start: Int, count: Int, after: Int) {}
 
         override fun onTextChanged(text: CharSequence?, start: Int, before: Int, count: Int) {
+            searchStartHandler.removeCallbacksAndMessages(null)
             if (text!!.length >= 2) {
-                searchStartHandler.removeCallbacksAndMessages(null)
                 searchStartHandler.postDelayed({
                     homeViewModel.loadContacts(
                         text.toString().trim(),
